@@ -12,6 +12,7 @@ namespace ConsultlocusSelenium.Tests.Design
     {
         private IWebDriver _driver;
         private IWebElement _avatarButton;
+        private int _treeIndex;
 
         private bool _stopTests;
 
@@ -127,8 +128,35 @@ namespace ConsultlocusSelenium.Tests.Design
                 Assert.Fail("Could not create (or display on the list) a Text Template!");
             }
 
+            _treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
+
             Console.WriteLine("Text Template created successfully!");
             Assert.Pass("Text Template created successfully!");
+        }
+
+        [Order(3)]
+        [Test]
+        public void TextTemplatesViewTest()
+        {
+            var textTemplateViewButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{_treeIndex}']//a[text()='View']"));
+            textTemplateViewButton.Click();
+            var paragraph = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//p[text()='SeleniumTestContent']"));
+
+            if (paragraph == null)
+            {
+                Assert.Fail("Could not load the content of the Text Template in under 5 seconds (or the content is incorrect)!");
+            }
+
+            _driver.Navigate().Back();
+            var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("a[routerlink = 'create']"));
+            if (newTextTemplateButton == null)
+            {
+                Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
+            }
+            Console.WriteLine("Text Template viewed successfully!");
+            Assert.Pass("Text Template viewed successfully!");
         }
     }
 }
