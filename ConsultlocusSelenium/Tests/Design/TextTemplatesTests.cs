@@ -39,7 +39,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [OneTimeTearDown]
         public void OtTearDown()
         {
-            //_driver.Quit();
+            _driver.Quit();
         }
 
         [SetUp]
@@ -238,6 +238,39 @@ namespace ConsultlocusSelenium.Tests.Design
             }
             Console.WriteLine("Text Template edited successfully!");
             Assert.Pass("Text Template edited successfully!");
+        }
+
+        [Order(4)]
+        [Test]
+        public void TextTemplatesDeleteTest()
+        {
+            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
+            var textTemplateEditButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Delete']"));
+            textTemplateEditButton.Click();
+            var nextButton = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[text()='Delete']"));
+            if (nextButton == null)
+            {
+                Assert.Fail("The 'Delete element' dialog did not appear!");
+            }
+            nextButton.Click();
+
+            _driver.Navigate().Refresh();
+
+            var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("a[routerlink = 'create']"));
+            if (newTextTemplateButton == null)
+            {
+                Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
+            }
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            if (textTemplateEntry != null)
+            {
+                Assert.Fail("Could not delete a Text Template!");
+            }
+            Console.WriteLine("Text Template deleted successfully!");
+            Assert.Pass("Text Template deleted successfully!");
         }
     }
 }
