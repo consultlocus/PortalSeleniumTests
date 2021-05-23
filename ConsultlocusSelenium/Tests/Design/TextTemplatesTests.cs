@@ -12,7 +12,6 @@ namespace ConsultlocusSelenium.Tests.Design
     {
         private IWebDriver _driver;
         private IWebElement _avatarButton;
-        private int _treeIndex;
 
         private bool _stopTests;
 
@@ -128,8 +127,6 @@ namespace ConsultlocusSelenium.Tests.Design
                 Assert.Fail("Could not create (or display on the list) a Text Template!");
             }
 
-            _treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
-
             Console.WriteLine("Text Template created successfully!");
             Assert.Pass("Text Template created successfully!");
         }
@@ -138,7 +135,10 @@ namespace ConsultlocusSelenium.Tests.Design
         [Test]
         public void TextTemplatesViewTest()
         {
-            var textTemplateViewButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{_treeIndex}']//a[text()='View']"));
+            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestName ']"));
+            var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
+
+            var textTemplateViewButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='View']"));
             textTemplateViewButton.Click();
             var paragraph = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//p[text()='SeleniumTestContent']"));
@@ -155,8 +155,89 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestName ']"));
+            if (textTemplateEntry == null)
+            {
+                Assert.Fail("Could not create (or display on the list) a Text Template!");
+            }
             Console.WriteLine("Text Template viewed successfully!");
             Assert.Pass("Text Template viewed successfully!");
+        }
+
+        [Order(4)]
+        [Test]
+        public void TextTemplatesEditTest()
+        {
+            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestName ']"));
+            var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
+            var textTemplateEditButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Edit']"));
+            textTemplateEditButton.Click();
+            var nextButton = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[text()='Next']"));
+            if (nextButton == null)
+            {
+                Assert.Fail("The 'Choose language' dialog did not appear!");
+            }
+            nextButton.Click();
+
+            var editTextTemplateNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("input[name = 'nameButton']"));
+            if (editTextTemplateNameInput == null)
+            {
+                Assert.Fail("Could not load the 'Name' input in under 5 seconds!");
+            }
+            editTextTemplateNameInput.SendKeys("EDITED");
+
+            var textAreaFrame = _driver.FindElement(By.CssSelector("iframe[class = 'k-iframe']"));
+            _driver.SwitchTo().Frame(textAreaFrame);
+
+            var textArea = _driver.FindElement(By.CssSelector("div[contenteditable = 'true']"));
+            textArea.Click();
+            textArea.SendKeys("\nSeleniumTestContentEdited");
+
+            _driver.SwitchTo().DefaultContent();
+
+            _driver.FindElement(By.XPath("//*[text()='Update']")).Click();
+
+            var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("a[routerlink = 'create']"));
+            if (newTextTemplateButton == null)
+            {
+                Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
+            }
+
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            if (textTemplateEntry == null)
+            {
+                Assert.Fail("Could not edit (or display on the list) the name of a Text Template!");
+            }
+
+            treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
+            var textTemplateViewButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='View']"));
+            textTemplateViewButton.Click();
+            var paragraph = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//p[text()='SeleniumTestContentEdited']"));
+
+            if (paragraph == null)
+            {
+                Assert.Fail("Could not load the content of the Text Template in under 5 seconds (or the content is incorrectly edited)!");
+            }
+
+            _driver.Navigate().Back();
+
+            newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("a[routerlink = 'create']"));
+            if (newTextTemplateButton == null)
+            {
+                Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
+            }
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            if (textTemplateEntry == null)
+            {
+                Assert.Fail("Could not edit (or display on the list) a Text Template!");
+            }
+            Console.WriteLine("Text Template edited successfully!");
+            Assert.Pass("Text Template edited successfully!");
         }
     }
 }
