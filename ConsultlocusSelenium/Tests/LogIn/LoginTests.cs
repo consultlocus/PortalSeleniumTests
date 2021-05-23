@@ -3,24 +3,16 @@ using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 
-namespace ConsultlocusSelenium
+namespace ConsultlocusSelenium.Tests.LogIn
 {
-    public class LoginPageTests
+    public class LoginTests
     {
         private IWebDriver _driver;
-        private IConfigurationRoot _configuration;
-
-        public LoginPageTests()
-        {
-            _configuration = new ConfigurationBuilder()
-                .AddUserSecrets<LoginPageTests>()
-                .Build();
-        }
+        private bool _stopTests;
 
         [OneTimeSetUp]
-        public void Setup()
+        public void OtSetup()
         {
             ChromeOptions options = new ChromeOptions();
             options.AddArgument("--disable-notifications");
@@ -32,26 +24,39 @@ namespace ConsultlocusSelenium
             _driver = new ChromeDriver(options);
         }
 
+        [OneTimeTearDown]
+        public void OtTearDown()
+        {
+            _driver.Close();
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            Assume.That(_stopTests, Is.False, "Stopped testing because the action before failed!");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (TestContext.CurrentContext.Result.Outcome.Status != NUnit.Framework.Interfaces.TestStatus.Passed)
+            {
+                _stopTests = true;
+            }
+        }
+
         [Order(1)]
         [Test]
         public void CorrectCredentialsLoginTest()
         {
-            _driver.Navigate().GoToUrl(@"https://app.consultlocus.com");
-
-            //Filling the login form
-            _driver.FindElement(By.CssSelector("input[formcontrolname = 'email']")).SendKeys(_configuration["Credentials:Login"]);
-            var pass = _driver.FindElement(By.CssSelector("input[type = 'password']"));
-            pass.SendKeys(_configuration["Credentials:Password"]);
-            pass.Submit();
-
-            //Checking if the avatar button on the upper right side has been loaded
-            var avatarButton = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(10),
-                By.CssSelector("button[class='HeaderNavMainLink dontCloseModal mr-2']"));
+            var avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
 
             if (avatarButton == null)
             {
-                Assert.Fail("Login failed - could not load avatar button in less than 10 seconds!");
+                Assert.Fail($"Login failed - could not load avatar button in less than {Helpers.LogIn.WaitTime.Seconds} seconds!\nMaybe credentials are wrong?");
             }
+
+            Console.WriteLine("Successfully logged in!");
             Assert.Pass("Successfully logged in!");
         }
 
@@ -71,6 +76,8 @@ namespace ConsultlocusSelenium
             {
                 Assert.Fail("Logout failed - could not load sign in form in less than 5 seconds!");
             }
+
+            Console.WriteLine("Successfully logged out!");
             Assert.Pass("Successfully logged out!");
         }
 
@@ -79,6 +86,7 @@ namespace ConsultlocusSelenium
         public void IncorrectCredentialsLoginTest()
         {
             //Because our 2nd test logged us out, we can now check for incorrect credentials behaviour
+
             //Credentials passed are:
             //login: bad
             //password: credentials
@@ -97,7 +105,10 @@ namespace ConsultlocusSelenium
             }
 
             //Checking if the text in the alert is the same as designed (can be ommited, could be just Assert.Pass(); )
-            Assert.That(failedLoginDialog.Text.Equals("Invalid Credentials\r\nCould not log you in with the credentials you entered. Please check your entered email and password.\r\nOkay"), "Failed to log in with credentials: \nLogin: bad \nPassword: credentials");
+            Assert.That(failedLoginDialog.Text.Equals("Invalid Credentials\r\nCould not log you in with the credentials you entered. Please check your entered email and password.\r\nOkay"),
+                "Failed to log in with credentials: \nLogin: bad \nPassword: credentials");
+            Console.WriteLine("Failed to log in with credentials: \nLogin: bad \nPassword: credentials");
+
             //Assert.Pass("Failed to log in with credentials: \nLogin: bad \nPassword: credentials");
         }
     }

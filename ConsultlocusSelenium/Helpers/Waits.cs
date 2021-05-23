@@ -17,9 +17,8 @@ namespace ConsultlocusSelenium.Helpers
                     .Until(drv => drv.FindElement(by));
                 return element;
             }
-            catch (WebDriverTimeoutException e)
+            catch (WebDriverTimeoutException)
             {
-                Console.WriteLine(e);
                 return null;
             }
         }
