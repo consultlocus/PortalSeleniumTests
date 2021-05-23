@@ -27,7 +27,7 @@ namespace ConsultlocusSelenium.Tests.LogIn
         [OneTimeTearDown]
         public void OtTearDown()
         {
-            _driver.Close();
+            _driver.Quit();
         }
 
         [SetUp]

@@ -39,7 +39,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [OneTimeTearDown]
         public void OtTearDown()
         {
-            //_driver.Close();
+            //_driver.Quit();
         }
 
         [SetUp]
@@ -62,8 +62,23 @@ namespace ConsultlocusSelenium.Tests.Design
         public void TextTemplatesListTest()
         {
             _avatarButton.Click();
-            _driver.FindElement(By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']")).Click();
-            _driver.FindElement(By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Text Templates']")).Click();
+
+            var designButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']"));
+            if (designButton == null)
+            {
+                Assert.Fail("Could not load the 'Design' button in under 5 seconds!");
+            }
+            designButton.Click();
+
+            var textTemplatesButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Text Templates']"));
+            if (textTemplatesButton == null)
+            {
+                Assert.Fail("Could not load the 'Text Templates' button in under 5 seconds!");
+            }
+            textTemplatesButton.Click();
+
             var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.CssSelector("a[routerlink = 'create']"));
             if (newTextTemplateButton == null)
@@ -72,6 +87,48 @@ namespace ConsultlocusSelenium.Tests.Design
             }
             Console.WriteLine("List of Text Templates loaded successfully!");
             Assert.Pass("List of Text Templates loaded successfully!");
+        }
+
+        [Order(2)]
+        [Test]
+        public void TextTemplatesCreateTest()
+        {
+            _driver.FindElement(By.CssSelector("a[routerlink = 'create']")).Click();
+            var newTextTemplateNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("input[name = 'nameButton']"));
+            if (newTextTemplateNameInput == null)
+            {
+                Assert.Fail("Could not load the 'Name' input in under 5 seconds!");
+            }
+
+            newTextTemplateNameInput.SendKeys("SeleniumTestName");
+
+            var textAreaFrame = _driver.FindElement(By.CssSelector("iframe[class = 'k-iframe']"));
+            _driver.SwitchTo().Frame(textAreaFrame);
+
+            var textArea = _driver.FindElement(By.CssSelector("div[contenteditable = 'true']"));
+            textArea.Click();
+            textArea.SendKeys("SeleniumTestContent");
+
+            _driver.SwitchTo().DefaultContent();
+
+            _driver.FindElement(By.XPath("//*[text()='Create']")).Click();
+
+            var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.CssSelector("a[routerlink = 'create']"));
+            if (newTextTemplateButton == null)
+            {
+                Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
+            }
+
+            var textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestName ']"));
+            if (textTemplateEntry == null)
+            {
+                Assert.Fail("Could not create (or display on the list) a Text Template!");
+            }
+
+            Console.WriteLine("Text Template created successfully!");
+            Assert.Pass("Text Template created successfully!");
         }
     }
 }

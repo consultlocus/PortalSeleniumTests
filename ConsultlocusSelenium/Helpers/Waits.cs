@@ -22,5 +22,33 @@ namespace ConsultlocusSelenium.Helpers
                 return null;
             }
         }
+
+        public static bool WaitUntilElementVisible(IWebDriver driver, TimeSpan timeSpan, IWebElement element)
+        {
+            try
+            {
+                var wait = new WebDriverWait(driver, timeSpan);
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(element));
+                return true;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
+        }
+
+        public static IWebElement WaitUntilElementVisible(IWebDriver driver, TimeSpan timeSpan, By by)
+        {
+            try
+            {
+                var wait = new WebDriverWait(driver, timeSpan);
+                var obj = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(by));
+                return obj;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return null;
+            }
+        }
     }
 }
