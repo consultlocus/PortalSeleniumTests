@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace ConsultlocusSelenium.Tests.Design
 {
@@ -23,7 +24,7 @@ namespace ConsultlocusSelenium.Tests.Design
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            //options.AddArgument("headless");
+            options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -121,7 +122,7 @@ namespace ConsultlocusSelenium.Tests.Design
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
 
-            var textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestName ']"));
+            var textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestName')]"));
             if (textTemplateEntry == null)
             {
                 Assert.Fail("Could not create (or display on the list) a Text Template!");
@@ -135,7 +136,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [Test]
         public void TextTemplatesViewTest()
         {
-            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestName ']"));
+            var textTemplateEntry = _driver.FindElement(By.XPath("//span[contains(text(), 'seleniumTestName')]"));
             var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
 
             var textTemplateViewButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='View']"));
@@ -155,7 +156,7 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
-            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestName ']"));
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestName')]"));
             if (textTemplateEntry == null)
             {
                 Assert.Fail("Could not create (or display on the list) a Text Template!");
@@ -168,7 +169,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [Test]
         public void TextTemplatesEditTest()
         {
-            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestName ']"));
+            var textTemplateEntry = _driver.FindElement(By.XPath("//span[contains(text(), 'seleniumTestName')]"));
             var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
             var textTemplateEditButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Edit']"));
             textTemplateEditButton.Click();
@@ -206,7 +207,7 @@ namespace ConsultlocusSelenium.Tests.Design
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
 
-            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestNameEDITED')]"));
             if (textTemplateEntry == null)
             {
                 Assert.Fail("Could not edit (or display on the list) the name of a Text Template!");
@@ -231,7 +232,7 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
-            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestNameEDITED')]"));
             if (textTemplateEntry == null)
             {
                 Assert.Fail("Could not edit (or display on the list) a Text Template!");
@@ -244,7 +245,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [Test]
         public void TextTemplatesDeleteTest()
         {
-            var textTemplateEntry = _driver.FindElement(By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            var textTemplateEntry = _driver.FindElement(By.XPath("//span[contains(text(), 'seleniumTestNameEDITED')]"));
             var treeIndex = int.Parse(textTemplateEntry.GetAttribute("data-treeindex"));
             var textTemplateEditButton = _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Delete']"));
             textTemplateEditButton.Click();
@@ -264,7 +265,7 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not load the 'New Text Templates' button in under 5 seconds!");
             }
-            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//*[text()=' seleniumTestNameEDITED ']"));
+            textTemplateEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestNameEDITED')]"));
             if (textTemplateEntry != null)
             {
                 Assert.Fail("Could not delete a Text Template!");
