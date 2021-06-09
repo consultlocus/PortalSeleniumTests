@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ConsultlocusSelenium.Helpers;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace ConsultlocusSelenium.Tests.Design
+namespace ConsultlocusSelenium.Tests.Design.Grids
 {
     public class GridsTests
     {
@@ -23,7 +21,7 @@ namespace ConsultlocusSelenium.Tests.Design
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            //options.AddArgument("headless");
+            options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -72,14 +70,14 @@ namespace ConsultlocusSelenium.Tests.Design
 
             designButton.Click();
 
-            var textTemplatesButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
+            var gridsButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
                 By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Grids']"));
-            if (textTemplatesButton == null)
+            if (gridsButton == null)
             {
                 Assert.Fail("Could not load the 'Grids' button in under 5 seconds!");
             }
 
-            textTemplatesButton.Click();
+            gridsButton.Click();
 
             var newGridButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//button[contains(text(), 'New Grid')]"));
@@ -92,7 +90,7 @@ namespace ConsultlocusSelenium.Tests.Design
             Assert.Pass("List of Grids loaded successfully!");
         }
 
-        [Order(1)]
+        [Order(2)]
         [Test]
         public void GridsCreateTest()
         {
@@ -169,14 +167,14 @@ namespace ConsultlocusSelenium.Tests.Design
             Assert.Pass("Grid created successfully!");
         }
 
-        [Order(2)]
+        [Order(3)]
         [Test]
         public void GridsViewTest()
         {
             //TODO check if columns in the GridView are named as they were in create.
         }
 
-        [Order(3)]
+        [Order(4)]
         [Test]
         public void GridsEditTest()
         {
@@ -234,7 +232,7 @@ namespace ConsultlocusSelenium.Tests.Design
             Assert.Pass("Grid edited successfully!");
         }
 
-        [Order(4)]
+        [Order(5)]
         [Test]
         public void GridsDeleteTest()
         {
