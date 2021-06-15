@@ -18,7 +18,7 @@ namespace ConsultlocusSelenium.Helpers
 
         public static IWebElement LogInWithSecret(IWebDriver driver)
         {
-            driver.Navigate().GoToUrl(@"https://app.consultlocus.com");
+            driver.Navigate().GoToUrl(@"https://test.consultlocus.com");
 
             //Filling the login form
             driver.FindElement(By.CssSelector("input[formcontrolname = 'email']")).SendKeys(_configuration["Credentials:Login"]);
