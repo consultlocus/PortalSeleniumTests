@@ -6,6 +6,7 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.UI;
 
 namespace ConsultlocusSelenium.Tests.Design.Grids
 {
@@ -14,10 +15,10 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
         private IWebDriver _driver;
         private IWebElement _avatarButton;
         private IWebElement _addNewRowButton;
+        private IWebElement _activeRow;
 
         private bool _stopTests;
         private bool _gridFound;
-        private bool _gridClean;
 
         [OneTimeSetUp]
         public void OtSetup()
@@ -67,12 +68,19 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'New Grid' button in under 5 seconds!");
             }
 
-            var gridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'SeleniumTestDataTypeGrid')]"));
-            var treeIndex = int.Parse(gridEntry.GetAttribute("data-treeindex"));
+            var gridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//div[contains(text(), 'SeleniumTestDataTypeGrid')]"));
+            if (gridEntry == null)
+            {
+                _gridFound = false;
+                Assert.Fail("Could not find the 'SeleniumTestDataTypeGrid' grid in under 5 seconds!");
+            }
+            _gridFound = true;
 
-            var gridEditButton =
-                _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='View']"));
-            gridEditButton.Click();
+            var dataSid = int.Parse(gridEntry.GetAttribute("data-sid").Replace("element", ""));
+
+            var gridViewButton =
+                _driver.FindElement(By.XPath($"//a[@data-sid='viewButton{dataSid}']"));
+            gridViewButton.Click();
 
             var gridViewRadioButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//input[@type='radio']"));
@@ -91,14 +99,12 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds!");
             }
-            _gridFound = true;
-            _gridClean = true;
         }
 
         [OneTimeTearDown]
         public void OtTearDown()
         {
-            //_driver.Quit();
+            _driver.Quit();
         }
 
         [SetUp]
@@ -106,12 +112,13 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
         {
             Assume.That(_stopTests, Is.False, "Stopped testing because login failed!");
             Assume.That(_gridFound, Is.True, "Stopped testing because could not locate the features grid!");
-            Assume.That(_gridClean, Is.True, "Stopped testing because grid is filled with data that were not removed!");
         }
 
         [TearDown]
         public void TearDown()
         {
+            //Comment this if you dont want to delete any of the created rows
+            RemoveRow(_driver, _activeRow);
         }
 
         [Order(1)]
@@ -125,31 +132,22 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
             createButton.Click();
             _driver.Navigate().Refresh();
             _addNewRowButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//button[text()='Add New']"));
-            _gridClean = false;
             if (_addNewRowButton == null)
             {
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the default values had been used!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using default values!");
             }
-
-            Actions actions = new Actions(_driver);
-            actions.ContextClick(addedRow).Perform();
-            var deleteRowButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//li[contains(text(), 'Delete')]"));
-            if (deleteRowButton == null)
-            {
-                Assert.Fail("Failed to delete a row!");
-            }
-            deleteRowButton.Click();
-            _gridClean = true;
         }
 
         [Order(2)]
@@ -163,6 +161,8 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
 
             var textInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='Text']"));
             textInput.SendKeys("TESTING");
@@ -176,22 +176,17 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using \"TESTING\" text value!");
             }
-            _gridClean = false;
 
             var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell' and text()='TESTING']"));
             if (testCell == null)
             {
-                RemoveRow(_driver, addedRow);
                 Assert.Fail("There is no cell with \"TESTING\" text value!");
             }
-
-            RemoveRow(_driver, addedRow);
-            _gridClean = true;
         }
 
         [Order(3)]
@@ -205,6 +200,8 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
 
             var textInput = _driver.FindElement(By.XPath("//span[@class='k-numeric-wrap']/input[@role='spinbutton']"));
             textInput.SendKeys("23.23");
@@ -218,21 +215,16 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using \"23.23\" numeric value!");
             }
-            _gridClean = false;
             var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell' and text()='23.23']"));
             if (testCell == null)
             {
-                RemoveRow(_driver, addedRow);
                 Assert.Fail("There is no cell with \"23.23\" numeric value!");
             }
-
-            RemoveRow(_driver, addedRow);
-            _gridClean = true;
         }
 
         [Order(4)]
@@ -246,6 +238,8 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
 
             var textInput = _driver.FindElement(By.XPath("//kendo-switch[@ng-reflect-name='Boolean']"));
             textInput.Click();
@@ -259,21 +253,16 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using \"true\" boolean value!");
             }
-            _gridClean = false;
             var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell' and text()='true']"));
             if (testCell == null)
             {
-                RemoveRow(_driver, addedRow);
                 Assert.Fail("There is no cell with \"true\" boolean value!");
             }
-
-            RemoveRow(_driver, addedRow);
-            _gridClean = true;
         }
 
         [Order(5)]
@@ -287,6 +276,8 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
 
             var textInput = _driver.FindElement(By.XPath("//select[@ng-reflect-name='List']"));
             textInput.Click();
@@ -309,21 +300,16 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using \"1. Highest - Urgent\" list value!");
             }
-            _gridClean = false;
             var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell']//select[@ng-reflect-model='0']"));
             if (testCell == null)
             {
-                RemoveRow(_driver, addedRow);
                 Assert.Fail("There is no cell with \"1. Highest - Urgent\" list value!");
             }
-
-            RemoveRow(_driver, addedRow);
-            _gridClean = true;
         }
 
         [Order(6)]
@@ -337,8 +323,16 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             {
                 Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
             }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
 
             var textInput = _driver.FindElement(By.XPath("//span[@class='k-dateinput-wrap']/input[@role='spinbutton']"));
+            textInput.SendKeys(Keys.ArrowLeft);
+            textInput.SendKeys(Keys.ArrowLeft);
+            textInput.SendKeys(Keys.ArrowLeft);
+            textInput.SendKeys(Keys.ArrowLeft);
+            textInput.SendKeys(Keys.ArrowLeft);
+            textInput.SendKeys(Keys.ArrowLeft);
             textInput.SendKeys("61520001200");
 
             createButton.Click();
@@ -350,35 +344,122 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the date value had been set!");
             }
 
-            var addedRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
-            if (addedRow == null)
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
             {
                 Assert.Fail("Failed to create a row using \"6/15/2000 12:00 AM\" date value!");
             }
-            _gridClean = false;
             var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell' and text()='6/15/2000 12:00 AM']"));
             if (testCell == null)
             {
-                RemoveRow(_driver, addedRow);
                 Assert.Fail("There is no cell with \"6/15/2000 12:00 AM\" date value!");
             }
+        }
 
-            RemoveRow(_driver, addedRow);
-            _gridClean = true;
+        [Order(7)]
+        [Test]
+        public void IsCalculationalWorking()
+        {
+            _addNewRowButton.Click();
+            var createButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[contains(text(), 'Create')]"));
+            if (createButton == null)
+            {
+                Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
+            }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
+
+            var numericInput = _driver.FindElement(By.XPath("//span[@class='k-numeric-wrap']/input[@role='spinbutton']"));
+            numericInput.SendKeys("44");
+
+            var calcInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='Calculational']"));
+            calcInput.SendKeys("[2]+66");
+
+            createButton.Click();
+            _driver.Navigate().Refresh();
+            _addNewRowButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[text()='Add New']"));
+            if (_addNewRowButton == null)
+            {
+                Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
+            }
+
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
+            {
+                Assert.Fail("Failed to create a row using \"[2]+66\" calculational value!");
+            }
+            var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell' and text()='110']"));
+            if (testCell == null)
+            {
+                Assert.Fail("There is no cell with \"110\" numeric value!");
+            }
+        }
+
+        [Order(8)]
+        [Test]
+        public void IsPictureAndFileWorking()
+        {
+            _addNewRowButton.Click();
+            var createButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[contains(text(), 'Create')]"));
+            if (createButton == null)
+            {
+                Assert.Fail("Could not load the 'Create' button in under 5 seconds!");
+            }
+            var typeInput = _driver.FindElement(By.XPath("//input[@ng-reflect-name='rowTypeCheckbox']"));
+            typeInput.Click();
+
+            var filesInput = _driver.FindElements(By.XPath("//input[@name='files']"));
+            foreach (IWebElement element in filesInput)
+            {
+                element.SendKeys("C:/Selenium/001.jpg");
+            }
+            //Wait 2 seconds to finish upload
+            Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(1), By.XPath("//input[@id='0']"));
+
+            createButton.Click();
+            _driver.Navigate().Refresh();
+            _addNewRowButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//button[text()='Add New']"));
+            if (_addNewRowButton == null)
+            {
+                Assert.Fail("Could not load the 'Add New' button in under 5 seconds, after the text value had been set!");
+            }
+
+            _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
+            if (_activeRow == null)
+            {
+                Assert.Fail("Failed to create a row using picture and file value!");
+            }
+            var testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//td[@kendogridlogicalcell and @role='gridcell']/a[text()='001.jpg']"));
+            if (testCell == null)
+            {
+                Assert.Fail("There is no cell with file set correctly!");
+            }
+            testCell = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//img"));
+            if (testCell == null)
+            {
+                Assert.Fail("There is no cell with picture set correctly!");
+            }
         }
 
         [Theory]
         public static bool RemoveRow(IWebDriver _driver, IWebElement row)
         {
+            var rowIndex = row.GetAttribute("data-kendo-grid-item-index");
+            var colIdCell = _driver.FindElement(By.XPath($"//td[@data-kendo-grid-column-index='0' and @ng-reflect-data-row-index='{rowIndex}']"));
             Actions actions = new Actions(_driver);
-            actions.ContextClick(row).Perform();
+            actions.ContextClick(colIdCell).Perform();
             var deleteRowButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//li[contains(text(), 'Delete')]"));
             if (deleteRowButton == null)
             {
                 Assert.Fail("Failed to delete a row!");
                 return false;
             }
-            deleteRowButton.Click();
+
+            actions.MoveToElement(deleteRowButton).Click().Perform();
             return true;
         }
     }

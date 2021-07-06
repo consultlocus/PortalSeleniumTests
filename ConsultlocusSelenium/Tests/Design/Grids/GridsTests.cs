@@ -120,7 +120,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
 
             newFieldButton.Click();
 
-            var textFieldNameInput = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+            var textFieldNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//input[@id='fieldName-0']"));
             if (textFieldNameInput == null)
             {
@@ -131,7 +131,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
 
             newFieldButton.Click();
 
-            var numberFieldNameInput = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+            var numberFieldNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//input[@id='fieldName-1']"));
             if (textFieldNameInput == null)
             {
@@ -157,7 +157,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             createButton.Click();
 
             var gridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.XPath("//span[contains(text(), 'seleniumTestGridName')]"));
+                By.XPath("//div[contains(text(), 'seleniumTestGridName')]"));
             if (gridEntry == null)
             {
                 Assert.Fail("Could not create (or display on the list) a Grid!");
@@ -178,11 +178,11 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
         [Test]
         public void GridsEditTest()
         {
-            var gridEntry = _driver.FindElement(By.XPath("//span[contains(text(), 'seleniumTestGridName')]"));
-            var treeIndex = int.Parse(gridEntry.GetAttribute("data-treeindex"));
+            var gridEntry = _driver.FindElement(By.XPath("//div[contains(text(), 'seleniumTestGridName')]"));
+            var dataSid = int.Parse(gridEntry.GetAttribute("data-sid").Replace("element", ""));
 
             var gridEditButton =
-                _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Edit']"));
+                _driver.FindElement(By.XPath($"//a[@data-sid='editButton{dataSid}']"));
             gridEditButton.Click();
 
             var gridNameInput = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
@@ -220,7 +220,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
             createButton.Click();
 
             var editedGridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.XPath("//span[contains(text(), 'seleniumTestGridNameEDITED')]"));
+                By.XPath("//div[contains(text(), 'seleniumTestGridNameEDITED')]"));
             if (gridEntry == null)
             {
                 Assert.Fail("Could not edit (or display on the list) a Grid!");
@@ -236,12 +236,12 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
         [Test]
         public void GridsDeleteTest()
         {
-            var gridEntry = _driver.FindElement(By.XPath("//span[contains(text(), 'seleniumTestGridNameEDITED')]"));
-            var treeIndex = int.Parse(gridEntry.GetAttribute("data-treeindex"));
+            var gridEntry = _driver.FindElement(By.XPath("//div[contains(text(), 'seleniumTestGridNameEDITED')]"));
+            var dataSid = int.Parse(gridEntry.GetAttribute("data-sid").Replace("element", ""));
 
-            var gridEditButton =
-                _driver.FindElement(By.XPath($"//span[@data-treeindex='{treeIndex}']//a[text()='Delete']"));
-            gridEditButton.Click();
+            var gridDeleteButton =
+                _driver.FindElement(By.XPath($"//a[@data-sid='deleteButton{dataSid}']"));
+            gridDeleteButton.Click();
 
             var nextButton = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//button[text()='Delete']"));
@@ -260,7 +260,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
                 Assert.Fail("Could not load the 'New Grid' button in under 5 seconds!");
             }
 
-            gridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//span[contains(text(), 'seleniumTestGridNameEDITED')]"));
+            gridEntry = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//div[contains(text(), 'seleniumTestGridNameEDITED')]"));
             if (gridEntry != null)
             {
                 Assert.Fail("Could not delete a Grid!");
