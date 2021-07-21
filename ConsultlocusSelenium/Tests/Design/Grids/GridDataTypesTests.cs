@@ -28,12 +28,11 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            //options.AddArgument("headless");
+            options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
             _avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
-
             if (_avatarButton == null)
             {
                 _stopTests = true;
