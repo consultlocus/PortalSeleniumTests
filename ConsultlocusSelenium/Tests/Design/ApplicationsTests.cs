@@ -40,7 +40,7 @@ namespace ConsultlocusSelenium.Tests.Design
         [OneTimeTearDown]
         public void OtTearDown()
         {
-            //_driver.Quit();
+            _driver.Quit();
         }
 
         [SetUp]
@@ -131,7 +131,7 @@ namespace ConsultlocusSelenium.Tests.Design
         public void ApplicationViewTest()
         {
             _driver.FindElement(By.XPath("//button[@data-sid='openApplicationLauncherButton']")).Click();
-            var applicationChoice = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+            var applicationChoice = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//span[contains(text(), 'Selenium Test Name')]"));
             if (applicationChoice == null)
             {
@@ -188,6 +188,12 @@ namespace ConsultlocusSelenium.Tests.Design
 
             newApplicationNameInput.SendKeys(" EDITED");
 
+            var functionalityToDragAndDrop = _driver.FindElement(By.XPath("//span[contains(text(),' Selenium App Test Template ')]"));
+            var whereToDrop = _driver.FindElement(By.XPath("//div[@class='col']/kendo-textbox-container/../kendo-treeview"));
+
+            Actions actions = new Actions(_driver);
+            actions.DragAndDrop(functionalityToDragAndDrop, whereToDrop).Build().Perform();
+
             _driver.FindElement(By.XPath("//button[contains(text(),'Update')]")).Click();
 
             newApplicationButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
@@ -202,9 +208,30 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not edit (or display on the list) an Application!");
             }
+
+            _driver.Navigate().Refresh();
+
+            var dropdownRoot = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//a[contains(text(),' SeleniumTestDataTypeGrid ')]"));
+
+            actions = new Actions(_driver);
+            actions.MoveToElement(dropdownRoot).Build().Perform();
+
+            var textTemplateFromDropdown = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//a[contains(text(),'Selenium App Test Template')]"));
+            textTemplateFromDropdown.Click();
+            var paragraph = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
+                By.XPath("//p[text()='Selenium Content']"));
+
+            if (paragraph == null)
+            {
+                Assert.Fail("Could not load the content of the Text Template in under 5 seconds (or the content is incorrect)!");
+            }
+
+            _driver.Navigate().Back();
         }
 
-        [Order(4)]
+        [Order(5)]
         [Test]
         public void ApplicationDeleteTest()
         {
