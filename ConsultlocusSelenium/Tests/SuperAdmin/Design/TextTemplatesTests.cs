@@ -1,13 +1,10 @@
 ﻿using System;
 using ConsultlocusSelenium.Helpers;
-using ConsultlocusSelenium.Tests.LogIn;
-using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 
-namespace ConsultlocusSelenium.Tests.Design
+namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
 {
     public class TextTemplatesTests
     {
@@ -28,7 +25,7 @@ namespace ConsultlocusSelenium.Tests.Design
 
             _driver = new ChromeDriver(options);
 
-            _avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
+            _avatarButton = Helpers.LogIn.LogInWithSuperAdminSecret(_driver);
 
             if (_avatarButton == null)
             {

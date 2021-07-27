@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ConsultlocusSelenium.Helpers;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 
-namespace ConsultlocusSelenium.Tests.Design
+namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
 {
     public class ApplicationsTests
     {
@@ -24,11 +22,11 @@ namespace ConsultlocusSelenium.Tests.Design
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            // options.AddArgument("headless");
+            options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
-            _avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
+            _avatarButton = Helpers.LogIn.LogInWithSuperAdminSecret(_driver);
 
             if (_avatarButton == null)
             {
@@ -137,7 +135,7 @@ namespace ConsultlocusSelenium.Tests.Design
             {
                 Assert.Fail("Could not load the 'Selenium Test Name' choice in under 5 seconds!");
             }
-
+            Waits.ImplicitWait(TimeSpan.FromSeconds(1));
             applicationChoice.Click();
 
             var dropdownRoot = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace ConsultlocusSelenium.Tests.Design.Grids
+namespace ConsultlocusSelenium.Tests.LocalAdmin.Design.Grids
 {
     public class GridsTests
     {
@@ -25,7 +25,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
 
             _driver = new ChromeDriver(options);
 
-            _avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
+            _avatarButton = Helpers.LogIn.LogInWithLocalAdminSecret(_driver);
 
             if (_avatarButton == null)
             {

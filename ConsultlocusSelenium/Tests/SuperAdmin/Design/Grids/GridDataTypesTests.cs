@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ConsultlocusSelenium.Helpers;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Support.UI;
 
-namespace ConsultlocusSelenium.Tests.Design.Grids
+namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
 {
     public class GridDataTypesTests
     {
@@ -32,7 +29,7 @@ namespace ConsultlocusSelenium.Tests.Design.Grids
 
             _driver = new ChromeDriver(options);
 
-            _avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
+            _avatarButton = Helpers.LogIn.LogInWithSuperAdminSecret(_driver);
             if (_avatarButton == null)
             {
                 _stopTests = true;

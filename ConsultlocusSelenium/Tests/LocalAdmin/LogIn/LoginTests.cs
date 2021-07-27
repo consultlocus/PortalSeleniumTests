@@ -1,10 +1,9 @@
 using System;
-using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace ConsultlocusSelenium.Tests.LogIn
+namespace ConsultlocusSelenium.Tests.LocalAdmin.LogIn
 {
     public class LoginTests
     {
@@ -49,7 +48,7 @@ namespace ConsultlocusSelenium.Tests.LogIn
         [Test]
         public void CorrectCredentialsLoginTest()
         {
-            var avatarButton = Helpers.LogIn.LogInWithSecret(_driver);
+            var avatarButton = Helpers.LogIn.LogInWithLocalAdminSecret(_driver);
 
             if (avatarButton == null)
             {
