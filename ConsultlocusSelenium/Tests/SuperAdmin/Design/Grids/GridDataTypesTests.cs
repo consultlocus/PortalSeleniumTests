@@ -16,16 +16,18 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
 
         private bool _stopTests;
         private bool _gridFound;
+        private bool _defaultWorking;
 
         [OneTimeSetUp]
         public void OtSetup()
         {
+            _defaultWorking = true;
             ChromeOptions options = new ChromeOptions();
             options.AddArgument("--disable-notifications");
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            options.AddArgument("headless");
+            //options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -40,7 +42,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
             _avatarButton.Click();
 
             var designButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']"));
+                By.XPath("//div/a[contains(text(),'Design')]/.."));
             if (designButton == null)
             {
                 Assert.Fail("Could not load the 'Design' button in under 5 seconds!");
@@ -49,7 +51,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
             designButton.Click();
 
             var gridsButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Grids']"));
+                By.XPath("//div/a[contains(text(),'Grids')]/.."));
             if (gridsButton == null)
             {
                 Assert.Fail("Could not load the 'Grids' button in under 5 seconds!");
@@ -108,13 +110,17 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
         {
             Assume.That(_stopTests, Is.False, "Stopped testing because login failed!");
             Assume.That(_gridFound, Is.True, "Stopped testing because could not locate the features grid!");
+            Assume.That(_defaultWorking, Is.True);
         }
 
         [TearDown]
         public void TearDown()
         {
             //Comment this if you dont want to delete any of the created rows
-            RemoveRow(_driver, _activeRow);
+            if (_defaultWorking)
+            {
+                RemoveRow(_driver, _activeRow);
+            }
         }
 
         [Order(1)]
@@ -142,8 +148,11 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
             _activeRow = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5), By.XPath("//tr[@kendogridlogicalrow and @role='row' and @data-kendo-grid-item-index='0' ]"));
             if (_activeRow == null)
             {
+                _defaultWorking = false;
                 Assert.Fail("Failed to create a row using default values!");
             }
+
+            _defaultWorking = true;
         }
 
         [Order(2)]

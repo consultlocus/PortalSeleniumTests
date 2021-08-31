@@ -21,7 +21,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            options.AddArgument("headless");
+            // options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -62,7 +62,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
             _avatarButton.Click();
 
             var designButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']"));
+                By.XPath("//div/a[contains(text(),'Design')]/.."));
             if (designButton == null)
             {
                 Assert.Fail("Could not load the 'Design' button in under 5 seconds!");
@@ -71,7 +71,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design.Grids
             designButton.Click();
 
             var gridsButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Grids']"));
+                By.XPath("//div/a[contains(text(),'Grids')]/.."));
             if (gridsButton == null)
             {
                 Assert.Fail("Could not load the 'Grids' button in under 5 seconds!");
