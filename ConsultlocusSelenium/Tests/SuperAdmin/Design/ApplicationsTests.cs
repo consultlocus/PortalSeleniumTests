@@ -22,7 +22,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            options.AddArgument("headless");
+            // options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -63,7 +63,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             _avatarButton.Click();
 
             var designButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']"));
+                By.XPath("//div/a[contains(text(),'Design')]/.."));
             if (designButton == null)
             {
                 Assert.Fail("Could not load the 'Design' button in under 5 seconds!");
@@ -71,7 +71,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             designButton.Click();
 
             var applicationsButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Applications']"));
+                By.XPath("//div/a[contains(text(),'Application')]/.."));
             if (applicationsButton == null)
             {
                 Assert.Fail("Could not load the 'Applications' button in under 5 seconds!");
@@ -108,7 +108,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             Actions actions = new Actions(_driver);
             actions.DragAndDrop(functionalityToDragAndDrop, whereToDrop).Build().Perform();
 
-            _driver.FindElement(By.XPath("//button[contains(text(),'Create')]")).Click();
+            _driver.FindElement(By.XPath("//button[contains(text(),'Create') and not(contains(text(),'Application'))]")).Click();
 
             var newApplicationButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//button[contains(text(), 'Create New Application')]"));
@@ -163,7 +163,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             _avatarButton.Click();
 
             var applicationsButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Applications']"));
+                By.XPath("//div/a[contains(text(),'Application')]/.."));
             if (applicationsButton == null)
             {
                 Assert.Fail("Could not load the 'Applications' button in under 5 seconds!");

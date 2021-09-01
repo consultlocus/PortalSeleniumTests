@@ -3,6 +3,7 @@ using ConsultlocusSelenium.Helpers;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
 {
@@ -21,7 +22,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
 
             //If you want to run the tests without opening the browser, uncomment this
             //If you want to run the tests with a browser gui, comment this
-            options.AddArgument("headless");
+            // options.AddArgument("headless");
 
             _driver = new ChromeDriver(options);
 
@@ -62,7 +63,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             _avatarButton.Click();
 
             var designButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Design']"));
+                By.XPath("//div/a[contains(text(),'Design')]/.."));
             if (designButton == null)
             {
                 Assert.Fail("Could not load the 'Design' button in under 5 seconds!");
@@ -70,7 +71,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             designButton.Click();
 
             var textTemplatesButton = Waits.WaitUntilElementVisible(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("kendo-panelbar-item[ng-reflect-title = 'Text Templates']"));
+                By.XPath("//div/a[contains(text(),'Text Templates')]/.."));
             if (textTemplatesButton == null)
             {
                 Assert.Fail("Could not load the 'Text Templates' button in under 5 seconds!");
@@ -93,7 +94,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
         {
             _driver.FindElement(By.CssSelector("a[routerlink = 'create']")).Click();
             var newTextTemplateNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
-                By.CssSelector("input[name = 'nameButton']"));
+                By.XPath("//input[@name='nameButton']"));
             if (newTextTemplateNameInput == null)
             {
                 Assert.Fail("Could not load the 'Name' input in under 5 seconds!");
@@ -109,8 +110,8 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             textArea.SendKeys("Selenium Test Content");
 
             _driver.SwitchTo().DefaultContent();
-
-            _driver.FindElement(By.XPath("//*[text()='Create']")).Click();
+            Waits.ImplicitWait(TimeSpan.FromSeconds(0.5));
+            _driver.FindElement(By.XPath("//button[@data-sid='createButton']")).Click();
 
             var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.CssSelector("a[routerlink = 'create']"));
@@ -173,6 +174,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             var textTemplateEditButton =
                 _driver.FindElement(By.XPath($"//a[@data-sid='editButton{dataSid}']"));
             textTemplateEditButton.Click();
+
             var nextButton = Helpers.Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.XPath("//button[text()='Next']"));
             if (nextButton == null)
@@ -180,7 +182,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
                 Assert.Fail("The 'Choose language' dialog did not appear!");
             }
             nextButton.Click();
-
+            Waits.ImplicitWait(TimeSpan.FromSeconds(0.5));
             var editTextTemplateNameInput = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
                 By.CssSelector("input[name = 'nameButton']"));
             if (editTextTemplateNameInput == null)
@@ -192,12 +194,13 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             var textAreaFrame = _driver.FindElement(By.CssSelector("iframe[class = 'k-iframe']"));
             _driver.SwitchTo().Frame(textAreaFrame);
 
-            var textArea = _driver.FindElement(By.CssSelector("div[contenteditable = 'true']"));
+            var textArea = _driver.FindElement(By.XPath("//div[@contenteditable='true']"));
             textArea.Click();
+
             textArea.SendKeys("\nSelenium Test Content Edited");
 
             _driver.SwitchTo().DefaultContent();
-
+            Waits.ImplicitWait(TimeSpan.FromSeconds(0.5));
             _driver.FindElement(By.XPath("//*[text()='Update']")).Click();
 
             var newTextTemplateButton = Waits.WaitUntilElementLoads(_driver, TimeSpan.FromSeconds(5),
