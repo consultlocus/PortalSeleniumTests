@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using ConsultlocusSelenium.Helpers;
 using NUnit.Framework;
 using OpenQA.Selenium;
@@ -33,11 +34,17 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
                 _stopTests = true;
                 Assume.That(_stopTests, Is.False, "Stopped testing because login has failed!");
             }
+
+            //create log file
+            Logger.CreateLog(this.GetType().Name);
         }
 
         [OneTimeTearDown]
         public void OtTearDown()
         {
+            //sending email with problems
+            if (!Logger.IsLogFileEmpty(this.GetType().Name)) Emailer.SendEmail("Problems with " + this.GetType().Name, Logger.GetLinesFromLogFile(this.GetType().Name));
+
             _driver.Quit();
         }
 
@@ -53,6 +60,7 @@ namespace ConsultlocusSelenium.Tests.SuperAdmin.Design
             if (TestContext.CurrentContext.Result.Outcome.Status != NUnit.Framework.Interfaces.TestStatus.Passed)
             {
                 _stopTests = true;
+                Logger.WriteLinesToLog(this.GetType().Name, TestContext.CurrentContext.Result.Message);
             }
         }
 
