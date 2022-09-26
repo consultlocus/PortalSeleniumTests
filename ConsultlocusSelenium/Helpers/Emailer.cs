@@ -7,7 +7,7 @@ namespace ConsultlocusSelenium.Helpers
 {
     internal class Emailer
     {
-        public static string Receiver = "sasha.rzepkowska@gmail.com";
+        public static string Receiver = "srz@consultlocus.com";
 
         public static void SendEmail(string title, string body)
         {
